@@ -1,5 +1,5 @@
 // =======================
-// FIREBASE IMPORTS
+// IMPORTS
 // =======================
 
 import { db } from "./firebase.js";
@@ -7,10 +7,10 @@ import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
-  getDocs,
   doc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // =======================
@@ -20,140 +20,114 @@ import {
 let projetoEditandoId = null;
 
 // =======================
-// REFERÊNCIAS
+// REFERÊNCIAS FIRESTORE
 // =======================
 
 const projectsRef = collection(db, "projects");
 
 // =======================
-// ELEMENTOS DOM
+// DOM (após carregar)
 // =======================
 
-const listaProjetos = document.getElementById("listaProjetos");
-const btnSalvar = document.getElementById("btnSalvar");
-const tituloFormulario = document.getElementById("tituloFormulario");
+document.addEventListener("DOMContentLoaded", () => {
+  const listaProjetos = document.getElementById("listaProjetos");
+  const btnSalvar = document.getElementById("btnSalvar");
+  const tituloFormulario = document.getElementById("tituloFormulario");
 
-const nome = document.getElementById("nome");
-const area = document.getElementById("area");
-const integrantes = document.getElementById("integrantes");
-const descricao = document.getElementById("descricao");
-const statusSelect = document.getElementById("status");
+  const nome = document.getElementById("nome");
+  const area = document.getElementById("area");
+  const integrantes = document.getElementById("integrantes");
+  const descricao = document.getElementById("descricao");
+  const statusSelect = document.getElementById("status");
 
-// =======================
-// EVENTOS
-// =======================
+  btnSalvar.addEventListener("click", salvarProjeto);
 
-btnSalvar.addEventListener("click", salvarProjeto);
+  // =======================
+  // LISTENER EM TEMPO REAL
+  // =======================
 
-// =======================
-// FUNÇÕES PRINCIPAIS
-// =======================
+  onSnapshot(projectsRef, snapshot => {
+    listaProjetos.innerHTML = "";
 
-async function salvarProjeto() {
-  if (!nome.value.trim()) return;
+    snapshot.forEach(docSnap => {
+      const projeto = docSnap.data();
+      const id = docSnap.id;
 
-  const dados = {
-    nome: nome.value,
-    area: area.value,
-    integrantes: integrantes.value,
-    descricao: descricao.value,
-    status: statusSelect.value,
-    updatedAt: new Date()
-  };
+      const div = document.createElement("div");
+      div.className = "projeto";
 
-  if (projetoEditandoId === null) {
-    // NOVO PROJETO
-    await addDoc(projectsRef, {
-      ...dados,
-      createdAt: new Date()
+      div.innerHTML = `
+        <strong>${projeto.nome}</strong><br>
+        <b>Área:</b> ${projeto.area}<br>
+        <b>Integrantes:</b> ${projeto.integrantes}<br>
+        <b>Status:</b> ${projeto.status}<br><br>
+
+        <b>Descrição:</b><br>
+        ${projeto.descricao}<br><br>
+
+        <button class="editar">Editar</button>
+        <button class="excluir">Excluir</button>
+      `;
+
+      div.querySelector(".editar").onclick = () => editarProjeto(id, projeto);
+      div.querySelector(".excluir").onclick = () => excluirProjeto(id);
+
+      listaProjetos.appendChild(div);
     });
-  } else {
-    // EDIÇÃO
-    const projetoRef = doc(db, "projects", projetoEditandoId);
-    await updateDoc(projetoRef, dados);
+  });
 
-    projetoEditandoId = null;
-    tituloFormulario.innerText = "➕ Novo Projeto";
+  // =======================
+  // FUNÇÕES
+  // =======================
+
+  async function salvarProjeto() {
+    if (!nome.value.trim()) return;
+
+    const dados = {
+      nome: nome.value,
+      area: area.value,
+      integrantes: integrantes.value,
+      descricao: descricao.value,
+      status: statusSelect.value,
+      updatedAt: new Date()
+    };
+
+    if (projetoEditandoId === null) {
+      await addDoc(projectsRef, {
+        ...dados,
+        createdAt: new Date()
+      });
+    } else {
+      const projetoRef = doc(db, "projects", projetoEditandoId);
+      await updateDoc(projetoRef, dados);
+      projetoEditandoId = null;
+      tituloFormulario.innerText = "➕ Novo Projeto";
+    }
+
+    limparFormulario();
   }
 
-  limparFormulario();
-  carregarProjetos();
-}
+  function editarProjeto(id, projeto) {
+    nome.value = projeto.nome;
+    area.value = projeto.area;
+    integrantes.value = projeto.integrantes;
+    descricao.value = projeto.descricao;
+    statusSelect.value = projeto.status;
 
-async function editarProjeto(id, projeto) {
-  nome.value = projeto.nome;
-  area.value = projeto.area;
-  integrantes.value = projeto.integrantes;
-  descricao.value = projeto.descricao;
-  statusSelect.value = projeto.status;
+    projetoEditandoId = id;
+    tituloFormulario.innerText = "✏️ Editando Projeto";
+  }
 
-  projetoEditandoId = id;
-  tituloFormulario.innerText = "✏️ Editando Projeto";
-}
+  async function excluirProjeto(id) {
+    const projetoRef = doc(db, "projects", id);
+    await deleteDoc(projetoRef);
+  }
 
-async function excluirProjeto(id) {
-  const projetoRef = doc(db, "projects", id);
-  await deleteDoc(projetoRef);
-
-  carregarProjetos();
-}
-
-// =======================
-// RENDER
-// =======================
-
-async function carregarProjetos() {
-  listaProjetos.innerHTML = "";
-
-  const snapshot = await getDocs(projectsRef);
-
-  snapshot.forEach(docSnap => {
-    const projeto = docSnap.data();
-    const id = docSnap.id;
-
-    const div = document.createElement("div");
-    div.className = "projeto";
-
-    div.innerHTML = `
-      <strong>${projeto.nome}</strong><br>
-      <b>Área:</b> ${projeto.area}<br>
-      <b>Integrantes:</b> ${projeto.integrantes}<br>
-      <b>Status:</b> ${projeto.status}<br><br>
-
-      <b>Descrição:</b><br>
-      ${projeto.descricao}<br><br>
-
-      <button class="editar">Editar</button>
-      <button class="excluir">Excluir</button>
-    `;
-
-    div.querySelector(".editar").addEventListener("click", () =>
-      editarProjeto(id, projeto)
-    );
-
-    div.querySelector(".excluir").addEventListener("click", () =>
-      excluirProjeto(id)
-    );
-
-    listaProjetos.appendChild(div);
-  });
-}
-
-// =======================
-// UTIL
-// =======================
-
-function limparFormulario() {
-  nome.value = "";
-  area.value = "";
-  integrantes.value = "";
-  descricao.value = "";
-  statusSelect.value = "Não iniciado";
-}
-
-// =======================
-// INIT
-// =======================
-
-carregarProjetos();
-
+  function limparFormulario() {
+    nome.value = "";
+    area.value = "";
+    integrantes.value = "";
+    descricao.value = "";
+    statusSelect.value = "Não iniciado";
+  }
+});
