@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>FJA • Plataforma Interna</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topo">
+  <h1>FJA — Plataforma Interna</h1>
+  <p>Projetos • Organização • Evolução</p>
+</header>
+
+<main class="container">
+
+  <!-- LISTA -->
+  <section class="card">
+    <h2>📊 Projetos</h2>
+    <div id="listaProjetos"></div>
+  </section>
+
+  <!-- FORMULÁRIO -->
+  <section class="card">
+    <h2 id="tituloFormulario">➕ Novo Projeto</h2>
+
+    <input id="nome" placeholder="Nome do projeto">
+    <input id="area" placeholder="Área">
+    <input id="integrantes" placeholder="Integrantes">
+
+    <textarea id="descricao" placeholder="Descrição do projeto"></textarea>
+
+    <select id="status">
+      <option value="Não iniciado">Não iniciado</option>
+      <option value="Em desenvolvimento">Em desenvolvimento</option>
+      <option value="Finalizado">Finalizado</option>
+    </select>
+
+    <button id="btnSalvar">Salvar Projeto</button>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

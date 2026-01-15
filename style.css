@@ -1,0 +1,94 @@
+:root {
+  --bg: #0a0d1a;
+  --card: #12172e;
+  --purple: #7c83ff;
+  --text: #e5e7eb;
+  --danger: #ff5c7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Scrollbar discreta */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(124, 131, 255, 0.3);
+  border-radius: 10px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.topo {
+  text-align: center;
+  padding: 24px;
+}
+
+.topo h1 {
+  color: var(--purple);
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 20px 40px;
+}
+
+.card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+input, textarea, select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #0a0d1a;
+  border: 1px solid #2a2f55;
+  color: var(--text);
+  border-radius: 8px;
+}
+
+textarea {
+  min-height: 90px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--purple), #5f66e0);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.excluir {
+  background: linear-gradient(135deg, var(--danger), #ff2e63);
+  color: white;
+}
+
+button.editar {
+  margin-right: 6px;
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  color: #020617;
+}
+
+.projeto {
+  border-bottom: 1px solid #2a2f55;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
