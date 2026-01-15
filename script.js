@@ -49,37 +49,41 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
 
   onSnapshot(projectsRef, snapshot => {
-    listaProjetos.innerHTML = "";
+  listaProjetos.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
-      const projeto = docSnap.data();
-      const id = docSnap.id;
+  snapshot.forEach(docSnap => {
+    const projeto = docSnap.data();
+    const id = docSnap.id;
 
-      const div = document.createElement("div");
-      div.className = "projeto";
+    // 🚫 NÃO MOSTRA PROJETOS "EXCLUÍDOS"
+    if (projeto.ativo === false) return;
 
-      div.innerHTML = `
-        <strong>${projeto.nome}</strong><br>
-        <b>Área:</b> ${projeto.area}<br>
-        <b>Integrantes:</b> ${projeto.integrantes}<br>
-        <b>Status:</b> ${projeto.status}<br><br>
+    const div = document.createElement("div");
+    div.className = "projeto";
 
-        <b>Descrição:</b><br>
-        ${projeto.descricao}<br><br>
+    div.innerHTML = `
+      <strong>${projeto.nome}</strong><br>
+      <b>Área:</b> ${projeto.area}<br>
+      <b>Integrantes:</b> ${projeto.integrantes}<br>
+      <b>Status:</b> ${projeto.status}<br><br>
 
-        <button class="editar">Editar</button>
-        <button class="excluir">Excluir</button>
-      `;
+      <b>Descrição:</b><br>
+      ${projeto.descricao}<br><br>
 
-      div.querySelector(".editar").onclick = () =>
-        tentarEditar(id, projeto);
+      <button class="editar">Editar</button>
+      <button class="excluir">Excluir</button>
+    `;
 
-      div.querySelector(".excluir").onclick = () =>
-        tentarExcluir(id, projeto.password);
+    div.querySelector(".editar").onclick = () =>
+      tentarEditar(id, projeto);
 
-      listaProjetos.appendChild(div);
-    });
+    div.querySelector(".excluir").onclick = () =>
+      tentarExcluir(id, projeto.password);
+
+    listaProjetos.appendChild(div);
   });
+});
+
 
   // =======================
   // FUNÇÕES
@@ -103,9 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (projetoEditandoId === null) {
   await addDoc(projectsRef, {
-    ...dados,
-    createdAt: new Date()
-  });
+  ...dados,
+  ativo: true,
+  createdAt: new Date()
+});
 } else {
   const projetoRef = doc(db, "projects", projetoEditandoId);
 
@@ -158,7 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const projetoRef = doc(db, "projects", id);
 
-  await deleteDoc(projetoRef, {
+  await updateDoc(projetoRef, {
+    ativo: false,
     password: senha
   });
 }
@@ -172,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
 
 
