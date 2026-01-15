@@ -151,12 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
 
- async function tentarExcluir(id, senhaCorreta) {
+ async function tentarExcluir(id, projeto) {
   const senha = prompt("Digite a senha do projeto:");
 
   if (!senha) return;
 
-  if (senha !== senhaCorreta) {
+  if (senha !== projeto.password) {
     alert("Senha incorreta.");
     return;
   }
@@ -164,8 +164,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const projetoRef = doc(db, "projects", id);
 
   await updateDoc(projetoRef, {
+    nome: projeto.nome,
+    area: projeto.area,
+    integrantes: projeto.integrantes,
+    descricao: projeto.descricao,
+    status: projeto.status,
+    password: senha,
     ativo: false,
-    password: senha
+    updatedAt: new Date()
   });
 }
 
@@ -178,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
 
 
