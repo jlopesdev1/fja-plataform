@@ -102,18 +102,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     if (projetoEditandoId === null) {
-      await addDoc(projectsRef, {
-        ...dados,
-        createdAt: new Date()
-      });
-    } else {
-      const projetoRef = doc(db, "projects", projetoEditandoId);
-      await updateDoc(projetoRef, dados);
+  await addDoc(projectsRef, {
+    ...dados,
+    createdAt: new Date()
+  });
+} else {
+  const projetoRef = doc(db, "projects", projetoEditandoId);
 
-      projetoEditandoId = null;
-      senhaProjetoEditando = null;
-      tituloFormulario.innerText = "➕ Novo Projeto";
-    }
+  await updateDoc(projetoRef, {
+    ...dados,
+    password: senhaProjetoEditando
+  });
+
+  projetoEditandoId = null;
+  senhaProjetoEditando = null;
+  tituloFormulario.innerText = "➕ Novo Projeto";
+}
 
     limparFormulario();
   }
@@ -168,5 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
 
