@@ -1,12 +1,32 @@
 // =======================
+// FIREBASE IMPORTS
+// =======================
+
+import { db } from "./firebase.js";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  deleteDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// =======================
 // ESTADO
 // =======================
 
-let projetos = JSON.parse(localStorage.getItem("projetos")) || [];
-let indiceEditando = null;
+let projetoEditandoId = null;
 
 // =======================
-// ELEMENTOS
+// REFERÊNCIAS
+// =======================
+
+const projectsRef = collection(db, "projects");
+
+// =======================
+// ELEMENTOS DOM
 // =======================
 
 const listaProjetos = document.getElementById("listaProjetos");
@@ -20,16 +40,16 @@ const descricao = document.getElementById("descricao");
 const statusSelect = document.getElementById("status");
 
 // =======================
-// EVENTO
+// EVENTOS
 // =======================
 
 btnSalvar.addEventListener("click", salvarProjeto);
 
 // =======================
-// FUNÇÕES
+// FUNÇÕES PRINCIPAIS
 // =======================
 
-function salvarProjeto() {
+async function salvarProjeto() {
   if (!nome.value.trim()) return;
 
   const dados = {
@@ -37,65 +57,83 @@ function salvarProjeto() {
     area: area.value,
     integrantes: integrantes.value,
     descricao: descricao.value,
-    status: statusSelect.value
+    status: statusSelect.value,
+    updatedAt: new Date()
   };
 
-  if (indiceEditando === null) {
-    // Novo projeto
-    projetos.push(dados);
+  if (projetoEditandoId === null) {
+    // NOVO PROJETO
+    await addDoc(projectsRef, {
+      ...dados,
+      createdAt: new Date()
+    });
   } else {
-    // Edição
-    projetos[indiceEditando] = dados;
-    indiceEditando = null;
+    // EDIÇÃO
+    const projetoRef = doc(db, "projects", projetoEditandoId);
+    await updateDoc(projetoRef, dados);
+
+    projetoEditandoId = null;
     tituloFormulario.innerText = "➕ Novo Projeto";
   }
 
-  salvar();
   limparFormulario();
-  renderizarProjetos();
+  carregarProjetos();
 }
 
-function editarProjeto(index) {
-  const p = projetos[index];
+async function editarProjeto(id, projeto) {
+  nome.value = projeto.nome;
+  area.value = projeto.area;
+  integrantes.value = projeto.integrantes;
+  descricao.value = projeto.descricao;
+  statusSelect.value = projeto.status;
 
-  nome.value = p.nome;
-  area.value = p.area;
-  integrantes.value = p.integrantes;
-  descricao.value = p.descricao;
-  statusSelect.value = p.status;
-
-  indiceEditando = index;
+  projetoEditandoId = id;
   tituloFormulario.innerText = "✏️ Editando Projeto";
 }
 
-function excluirProjeto(index) {
-  projetos.splice(index, 1);
-  salvar();
-  renderizarProjetos();
+async function excluirProjeto(id) {
+  const projetoRef = doc(db, "projects", id);
+  await deleteDoc(projetoRef);
+
+  carregarProjetos();
 }
 
-function renderizarProjetos() {
+// =======================
+// RENDER
+// =======================
+
+async function carregarProjetos() {
   listaProjetos.innerHTML = "";
 
-  projetos.forEach((p, index) => {
+  const snapshot = await getDocs(projectsRef);
+
+  snapshot.forEach(docSnap => {
+    const projeto = docSnap.data();
+    const id = docSnap.id;
+
     const div = document.createElement("div");
     div.className = "projeto";
 
     div.innerHTML = `
-      <strong>${p.nome}</strong><br>
-      <b>Área:</b> ${p.area}<br>
-      <b>Integrantes:</b> ${p.integrantes}<br>
-      <b>Status:</b> ${p.status}<br><br>
-      <b>Descrição:</b><br>
-      ${p.descricao}<br><br>
+      <strong>${projeto.nome}</strong><br>
+      <b>Área:</b> ${projeto.area}<br>
+      <b>Integrantes:</b> ${projeto.integrantes}<br>
+      <b>Status:</b> ${projeto.status}<br><br>
 
-      <button class="editar" onclick="editarProjeto(${index})">
-        Editar
-      </button>
-      <button class="excluir" onclick="excluirProjeto(${index})">
-        Excluir
-      </button>
+      <b>Descrição:</b><br>
+      ${projeto.descricao}<br><br>
+
+      <button class="editar">Editar</button>
+      <button class="excluir">Excluir</button>
     `;
+
+    div.querySelector(".editar").addEventListener("click", () =>
+      editarProjeto(id, projeto)
+    );
+
+    div.querySelector(".excluir").addEventListener("click", () =>
+      excluirProjeto(id)
+    );
 
     listaProjetos.appendChild(div);
   });
@@ -104,10 +142,6 @@ function renderizarProjetos() {
 // =======================
 // UTIL
 // =======================
-
-function salvar() {
-  localStorage.setItem("projetos", JSON.stringify(projetos));
-}
 
 function limparFormulario() {
   nome.value = "";
@@ -121,4 +155,4 @@ function limparFormulario() {
 // INIT
 // =======================
 
-renderizarProjetos();
+carregarProjetos();
