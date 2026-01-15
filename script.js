@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     div.querySelector(".editar").onclick = () =>
       tentarEditar(id, projeto);
 
-    div.querySelector(".excluir").onclick = () =>
+   div.querySelector(".excluir").onclick = () =>
   tentarExcluir(id, projeto);
 
     listaProjetos.appendChild(div);
@@ -164,12 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const projetoRef = doc(db, "projects", id);
 
   await updateDoc(projetoRef, {
-    nome: projeto.nome,
-    area: projeto.area,
-    integrantes: projeto.integrantes,
-    descricao: projeto.descricao,
-    status: projeto.status,
-    password: senha,
     ativo: false,
     updatedAt: new Date()
   });
@@ -184,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
 
 
