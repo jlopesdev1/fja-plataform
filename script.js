@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tentarEditar(id, projeto);
 
     div.querySelector(".excluir").onclick = () =>
-      tentarExcluir(id, projeto.password);
+  tentarExcluir(id, projeto);
 
     listaProjetos.appendChild(div);
   });
@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
 
 
