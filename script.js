@@ -119,25 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function tentarEditar(id, projeto) {
-    const senha = prompt("Digite a senha do projeto:");
+  const senha = prompt("Digite a senha do projeto:");
 
-    if (senha !== projeto.password) {
-      alert("Senha incorreta.");
-      return;
-    }
+  if (!senha) return;
 
-    nome.value = projeto.nome;
-    area.value = projeto.area;
-    integrantes.value = projeto.integrantes;
-    descricao.value = projeto.descricao;
-    statusSelect.value = projeto.status;
-    passwordInput.value = projeto.password;
-
-    projetoEditandoId = id;
-    senhaProjetoEditando = projeto.password;
-
-    tituloFormulario.innerText = "✏️ Editando Projeto";
+  if (senha !== projeto.password) {
+    alert("Senha incorreta.");
+    return;
   }
+
+  nome.value = projeto.nome;
+  area.value = projeto.area;
+  integrantes.value = projeto.integrantes;
+  descricao.value = projeto.descricao;
+  statusSelect.value = projeto.status;
+  passwordInput.value = projeto.password;
+
+  projetoEditandoId = id;
+  senhaProjetoEditando = senha;
+
+  tituloFormulario.innerText = "✏️ Editando Projeto";
+}
+
 
  async function tentarExcluir(id, senhaCorreta) {
   const senha = prompt("Digite a senha do projeto:");
@@ -165,4 +168,5 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
 
