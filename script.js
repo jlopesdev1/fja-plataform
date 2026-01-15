@@ -139,17 +139,22 @@ document.addEventListener("DOMContentLoaded", () => {
     tituloFormulario.innerText = "✏️ Editando Projeto";
   }
 
-  async function tentarExcluir(id, senhaCorreta) {
-    const senha = prompt("Digite a senha para excluir:");
+ async function tentarExcluir(id, senhaCorreta) {
+  const senha = prompt("Digite a senha do projeto:");
 
-    if (senha !== senhaCorreta) {
-      alert("Senha incorreta.");
-      return;
-    }
+  if (!senha) return;
 
-    const projetoRef = doc(db, "projects", id);
-    await deleteDoc(projetoRef);
+  if (senha !== senhaCorreta) {
+    alert("Senha incorreta.");
+    return;
   }
+
+  const projetoRef = doc(db, "projects", id);
+
+  await deleteDoc(projetoRef, {
+    password: senha
+  });
+}
 
   function limparFormulario() {
     nome.value = "";
@@ -160,3 +165,4 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.value = "";
   }
 });
+
