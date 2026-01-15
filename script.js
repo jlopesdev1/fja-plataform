@@ -18,15 +18,16 @@ import {
 // =======================
 
 let projetoEditandoId = null;
+let senhaProjetoEditando = null;
 
 // =======================
-// REFERÊNCIAS FIRESTORE
+// FIRESTORE
 // =======================
 
 const projectsRef = collection(db, "projects");
 
 // =======================
-// DOM (após carregar)
+// DOM
 // =======================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -39,11 +40,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const integrantes = document.getElementById("integrantes");
   const descricao = document.getElementById("descricao");
   const statusSelect = document.getElementById("status");
+  const passwordInput = document.getElementById("password");
 
   btnSalvar.addEventListener("click", salvarProjeto);
 
   // =======================
-  // LISTENER EM TEMPO REAL
+  // LISTENER REALTIME
   // =======================
 
   onSnapshot(projectsRef, snapshot => {
@@ -69,8 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="excluir">Excluir</button>
       `;
 
-      div.querySelector(".editar").onclick = () => editarProjeto(id, projeto);
-      div.querySelector(".excluir").onclick = () => excluirProjeto(id);
+      div.querySelector(".editar").onclick = () =>
+        tentarEditar(id, projeto);
+
+      div.querySelector(".excluir").onclick = () =>
+        tentarExcluir(id, projeto.password);
 
       listaProjetos.appendChild(div);
     });
@@ -81,7 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
 
   async function salvarProjeto() {
-    if (!nome.value.trim()) return;
+    if (!nome.value.trim() || !passwordInput.value.trim()) {
+      alert("Nome e senha são obrigatórios.");
+      return;
+    }
 
     const dados = {
       nome: nome.value,
@@ -89,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
       integrantes: integrantes.value,
       descricao: descricao.value,
       status: statusSelect.value,
+      password: passwordInput.value,
       updatedAt: new Date()
     };
 
@@ -100,25 +109,44 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       const projetoRef = doc(db, "projects", projetoEditandoId);
       await updateDoc(projetoRef, dados);
+
       projetoEditandoId = null;
+      senhaProjetoEditando = null;
       tituloFormulario.innerText = "➕ Novo Projeto";
     }
 
     limparFormulario();
   }
 
-  function editarProjeto(id, projeto) {
+  function tentarEditar(id, projeto) {
+    const senha = prompt("Digite a senha do projeto:");
+
+    if (senha !== projeto.password) {
+      alert("Senha incorreta.");
+      return;
+    }
+
     nome.value = projeto.nome;
     area.value = projeto.area;
     integrantes.value = projeto.integrantes;
     descricao.value = projeto.descricao;
     statusSelect.value = projeto.status;
+    passwordInput.value = projeto.password;
 
     projetoEditandoId = id;
+    senhaProjetoEditando = projeto.password;
+
     tituloFormulario.innerText = "✏️ Editando Projeto";
   }
 
-  async function excluirProjeto(id) {
+  async function tentarExcluir(id, senhaCorreta) {
+    const senha = prompt("Digite a senha para excluir:");
+
+    if (senha !== senhaCorreta) {
+      alert("Senha incorreta.");
+      return;
+    }
+
     const projetoRef = doc(db, "projects", id);
     await deleteDoc(projetoRef);
   }
@@ -129,5 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     integrantes.value = "";
     descricao.value = "";
     statusSelect.value = "Não iniciado";
+    passwordInput.value = "";
   }
 });
